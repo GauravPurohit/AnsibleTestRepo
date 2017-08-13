@@ -58,11 +58,28 @@ $ Pass in only url, message but no name
 '''
 
 RETURN = '''
-
+	name: 
+		description: Name of the module being tested
+		required: True
+	url:
+		description: Specified URL should point to the online service/repository location that holds the ansible.zip file
+		required: True
+	message:
+		description: Optional message to include with the tests
+		required: False
+	success:
+		description: Indicates the status of the test run at various points viz. during download, extract, copy. 
+		required: False
 '''
 
 from ansible.module_utils.basic import AnsibleModule
 
+
+# 'ExtractZipandCopyToDir' function extracts contents from the downloaded archive and copies it over to another directory.
+# zipfilepath: C:\\cygwin1\\usr\\local\\lib\\library\\ansible.zip indicates the download location for the arhive
+# zipfileextractdir: C:\\cygwin1\\usr\\local\\lib\\library\\ansible\\ indicates the directory where archive contents are to be extracted
+# result: This dictionary stores the modified values of module_args to indicate the user at the output
+# module: This is used by AnsibleModule to take in arguments from the 'arguments.json' file
 
 def ExtractZipandCopyToDir(zipfilepath,zipfileextractdir,result,module):
 	UnZipFileNewLocation = "C:\\cygwin1\\usr\\local\\lib\\library\\exports\\"
@@ -93,12 +110,16 @@ def ExtractZipandCopyToDir(zipfilepath,zipfileextractdir,result,module):
 		result['success'] = "File Copy failed!"
 		module.fail_json(msg='Error locating and/or removing the file and/or directory at the specified path!', **result)
 		
+		
+# 'DownloadZip' function downloads archive file from the specified online service/repository. 
+# result: This dictionary stores the modified values of module_args to indicate the user at the output
+# module: This is used by AnsibleModule to take in arguments from the 'arguments.json' file
 
 def DownloadZip(result,module):
-	ZipFileDwnLocation = "C:\\cygwin1\\usr\\local\\lib\\library\\"
-	ZipFileName = "ansible.zip"
-	ZipFileExtractDir = "C:\\cygwin1\\usr\\local\\lib\\library\\ansible\\"
-	UrlLink = "https://raw.githubusercontent.com/GauravPurohit/AnsibleTestRepo/master/ansible.zip"
+	ZipFileDwnLocation = "C:\\cygwin1\\usr\\local\\lib\\library\\"      									#File download location
+	ZipFileName = "ansible.zip"																				#Downloaded archive file name
+	ZipFileExtractDir = "C:\\cygwin1\\usr\\local\\lib\\library\\ansible\\"									#Directory to be extracted to
+	UrlLink = "https://raw.githubusercontent.com/GauravPurohit/AnsibleTestRepo/master/ansible.zip" 			#Link to download archive file 
 	
 	if not result['url'] or result['url'] == '':
 		url = UrlLink
@@ -122,13 +143,15 @@ def DownloadZip(result,module):
 	result['success'] = "Download,Extract,Copy completed."
 	module.exit_json(msg='Exports complete!', **result)
 	
+# 'main' function gets all the arguments required by the AnsibleModule from external 'arguments.json' file 
+# and defines the result dictionary required to hold the modified values of module_args for the output. 
 
 def main():
 	module_args = dict(
-	name = dict(type='str',required=True),
-	url = dict(type='str',required=True),
-	message = dict(type='str',required=False),
-	success = dict(type='str',required=False, default="Initiating tests!")
+	name = dict(type='str',required=True),   									#AnsibleModule name
+	url = dict(type='str',required=True),    									#Download URL 
+	message = dict(type='str',required=False),  								#Optional message
+	success = dict(type='str',required=False, default="Initiating tests!")  	#Success indicator
 	)
 	module = AnsibleModule(
 		argument_spec=module_args,
