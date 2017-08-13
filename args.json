@@ -1,6 +1,6 @@
 {
- "ANSIBLE_MODULE_ARGS": {
-"name": "Ansible DownloadZip,Extract and Copy module",
+"ANSIBLE_MODULE_ARGS": {
+"name":"Ansible DownloadZip,Extract and Copy module",
 "url":"https://raw.githubusercontent.com/GauravPurohit/AnsibleTestRepo/master/ansible.zip",
 "message":"<Optional message goes here>",
 "success":""

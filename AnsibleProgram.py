@@ -40,8 +40,21 @@ EXAMPLES = '''
 # Pass in the name,url,message 
 "name": "Ansible DownloadZip,Extract and Copy module",
 "url":"https://raw.githubusercontent.com/GauravPurohit/AnsibleTestRepo/master/ansible.zip"
-"message":"<Optional message goes here>"
+"message":"Test 1: Downloads zip, extracts content and copies it over to desired location"
 "success":""
+
+$ Pass in name, incorrect url, message
+"name": "Ansible DownloadZip,Extract and Copy module",
+"url":"https://raw.githubusercontent.com/GauravPurohit/AnsibleTestRepo/master/ansible.zip"
+"message":"Test 2: Incorrect Url will fail downloading archive from the online service"
+"success":""
+
+$ Pass in only url, message but no name
+"name": "",
+"url":"https://raw.githubusercontent.com/GauravPurohit/AnsibleTestRepo/master/ansible.zip"
+"message":"Test 3:Name field is required by module logic for identifying the module being tested"
+"success":""
+
 '''
 
 RETURN = '''
@@ -59,21 +72,25 @@ def ExtractZipandCopyToDir(zipfilepath,zipfileextractdir,result,module):
 		tozip.extractall(zipfileextractdir)
 		tozip.close()
 	except:
+		result['success'] = "File Extract failed!"
 		module.fail_json(msg='Error extracting the specified zip file', **result)
 	try:
 		if not os.path.exists(UnZipFileNewLocation):
 			os.makedirs(UnZipFileNewLocation)
 	except:
+		result['success'] = "File Extract failed!"
 		module.fail_json(msg='Error locating and/or creating the directory at the specified location!', **result)
 	try: 
 		copyfile(zipfileextractdir+UnZipFileName,UnZipFileNewLocation+UnZipFileName)
 	except:
+		result['success'] = "File Copy failed!"
 		module.fail_json(msg='Error locating and/or copying the file at the specified location!', **result)
 	try:
 		if os.path.exists(zipfilepath):
 			os.remove(zipfilepath)
 		shutil.rmtree(zipfileextractdir)
 	except:
+		result['success'] = "File Copy failed!"
 		module.fail_json(msg='Error locating and/or removing the file and/or directory at the specified path!', **result)
 		
 
@@ -81,24 +98,28 @@ def DownloadZip(result,module):
 	ZipFileDwnLocation = "C:\\cygwin1\\usr\\local\\lib\\library\\"
 	ZipFileName = "ansible.zip"
 	ZipFileExtractDir = "C:\\cygwin1\\usr\\local\\lib\\library\\ansible\\"
+	UrlLink = "https://raw.githubusercontent.com/GauravPurohit/AnsibleTestRepo/master/ansible.zip"
 	
 	if not result['url'] or result['url'] == '':
-		url = "https://raw.githubusercontent.com/GauravPurohit/AnsibleTestRepo/master/ansible.zip"
+		url = UrlLink
 	try: 
 		responsecontent = requests.get(result['url'], verify=False)
 		if not responsecontent.status_code == 200:
-			module.fail_json(msg='Error making a webrequest to the specified URL!', **result)
-	except: 
+			result['success'] = "File Download failed!"
+			module.fail_json(msg='Error message:'+responsecontent.content, **result)
+	except:
+		result['success'] = "File Download failed!"
 		module.fail_json(msg='Error making a webrequest to the specified URL!', **result)
 	try:
 		with open((ZipFileDwnLocation+ZipFileName),'wb') as f:
 			f.write(responsecontent.content)
 	except:
+		result['success'] = "File Download failed!"
 		module.fail_json(msg='Error writing the specified file from URL to the disk!', **result)
 		
 	ExtractZipandCopyToDir((ZipFileDwnLocation+ZipFileName),ZipFileExtractDir,result,module)
 	
-	result['success'] = "True"
+	result['success'] = "Download,Extract,Copy completed."
 	module.exit_json(msg='Exports complete!', **result)
 	
 
