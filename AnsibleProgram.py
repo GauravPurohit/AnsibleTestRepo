@@ -4,6 +4,7 @@ import requests,os,zipfile,shutil
 import requests.packages.urllib3
 from shutil import copyfile
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from ansible.module_utils.basic import AnsibleModule
 
 # suppressing certificate warnings
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)   
@@ -50,6 +51,7 @@ $ Pass in name, incorrect url, message
 '''
 
 RETURN = '''
+---
 	name: 
 		description: Name of the module being tested
 		required: True
@@ -64,7 +66,7 @@ RETURN = '''
 		required: False
 '''
 
-from ansible.module_utils.basic import AnsibleModule
+
 
 
 # 'ExtractZipandCopyToDir' function extracts contents from the downloaded archive and copies it over to another directory.
